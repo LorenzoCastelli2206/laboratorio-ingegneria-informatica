@@ -1,4 +1,4 @@
-from store_inventory.store_inventory import StoreInventory
+from e_store.store_inventory.store_inventory import StoreInventory
 
 class Store:
     def __init__(self, name, money):
@@ -24,4 +24,4 @@ class Store:
                       f"per {effective_price:.2f}€.")
 
     def __str__(self) :
-        return f"'{self.name}', inventory: {self.inventory}, money: {self.money}."
+        return f"'{self.name}', inventory: \n{self.inventory}."

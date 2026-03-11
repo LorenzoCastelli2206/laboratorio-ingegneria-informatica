@@ -1,5 +1,5 @@
-from store.store import Store
-from customer.customer import GenericCustomer
+from e_store.store.store import Store
+from e_store.customer.customer import GenericCustomer
 
 
 class UI:

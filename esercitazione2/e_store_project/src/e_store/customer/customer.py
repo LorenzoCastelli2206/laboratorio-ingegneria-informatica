@@ -1,5 +1,5 @@
 from abc import ABC, abstractmethod
-from store_item.store_item import GenericItem
+from e_store.store_item.store_item import GenericItem
 
 class GenericCustomer(ABC):
     def __init__(self, name, balance, password):
@@ -7,9 +7,6 @@ class GenericCustomer(ABC):
         self.balance = balance
         self.password = password
 
-    def __str__(self) :
-        return f"'{self.name}', balance: {self.balance}, password: {self.password}."
-    
     def get_price(self, item):
         return item.price
     
@@ -21,6 +18,10 @@ class GenericCustomer(ABC):
     
     def pay(self, price_item):
         self.balance -= price_item
+
+    def __str__(self) :
+        return f"'{self.name}', balance: {self.balance}, password: {self.password}."
+    
 
 class NormalCustomer(GenericCustomer):
     def __init__(self, name, balance, password):

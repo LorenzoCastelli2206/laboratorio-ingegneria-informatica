@@ -9,12 +9,12 @@ def setup_store():
 
     laptops = NormalItem("Laptop", 800.0, "Italia")
     phones = NormalItem("Smartphone", 400.0, "Italia")
-    lorenzi = ForeignItem("Lore", 300.0, "Poggio San lorenzo")
+    macchine = ForeignItem("Macchina", 300.0, "Milano")
     drones = ForeignItem("Drone", 500.0, "Sapienza Flight Team")
 
     store.inventory.add_item(laptops, 5)
     store.inventory.add_item(phones, 10)
-    store.inventory.add_item(lorenzi, 3)
+    store.inventory.add_item(macchine, 3)
     store.inventory.add_item(drones, 2)
 
     return store

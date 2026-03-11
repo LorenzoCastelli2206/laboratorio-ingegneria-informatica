@@ -1,10 +1,8 @@
-from store_item.store_item import GenericItem
-
 class StoreInventory:
     def __init__(self):
        self.dictItem = {}
 
-    def has_item(self, item, quantity=1):
+    def has_item(self, item, quantity):
         return self.dictItem.get(item, 0) >= quantity
 
     def add_item(self, item, n):
@@ -18,5 +16,5 @@ class StoreInventory:
             del self.dictItem[item]
 
     def __str__(self) :
-        rows = [f"{key}: {value}" for key, value in self.dictItem.items()]
+        rows = [f"-{key}, quantity: {value}" for key, value in self.dictItem.items()]
         return "\n".join(rows)
