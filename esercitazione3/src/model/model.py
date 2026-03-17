@@ -39,39 +39,18 @@ class BasicModel(Model):
     def predict(self, reviews):
         return self.majority_class
     
-
-good_words = [
-    "good", "great", "excellent", "amazing", "wonderful", 
-    "fantastic", "outstanding", "superb", "brilliant", "perfect", 
-    "love", "loved", "best", "masterpiece", "beautiful", 
-    "enjoyable", "entertaining", "fun", "thrilling", "exciting", 
-    "engaging", "hilarious", "clever", "charming", "delightful", 
-    "impressive", "incredible", "magnificent", "spectacular", "breathtaking", 
-    "phenomenal", "awesome", "flawless", "fascinating", "gripping", 
-    "captivating", "satisfying", "recommend", "pleasant", "solid", 
-    "strong", "triumph", "classic", "uplifting", "fabulous", 
-    "stunning", "exceptional", "marvelous", "glorious", "masterclass"
-]
-bad_words = [
-    "bad", "terrible", "awful", "horrible", "worst", 
-    "boring", "dull", "slow", "stupid", "dumb", 
-    "predictable", "cliche", "disappointing", "disappointed", "garbage", 
-    "trash", "waste", "fail", "failed", "poorly", 
-    "weak", "messy", "confusing", "annoying", "irritating", 
-    "painful", "dreadful", "abysmal", "unwatchable", "lame", 
-    "flawed", "ridiculous", "nonsensical", "mediocre", "forgettable", 
-    "disaster", "hate", "hated", "avoid", "skip", 
-    "ruin", "ruined", "sadly", "unfortunately", "dragging", 
-    "flat", "pointless", "tedious", "uninspired", "pathetic"
-]
+min_freq = 5
+ratio_min = 1.9 
 
 class WordModel(Model):
     def __init__(self):
         self.majority_class = None
+        self.good_words = {}
+        self.bad_words = {}
 
     def train(self, reviews):
-        gd = set()
-        bd = set()
+        gd = {}
+        bd = {}
         texts = [r["text"] for r in reviews]
         labels = [l["label"] for l in reviews]
         
@@ -79,52 +58,71 @@ class WordModel(Model):
         for row in texts: 
             words = row.strip().split(' ')
             for w in words:
+                parola_pulita = clean_word(w)
                 if labels[contatore] == "1":
-                    gd.add(clean_word(w))
+                    if parola_pulita in gd:
+                        gd[parola_pulita] += 1
+                    else:
+                        gd[parola_pulita] = 1
+                    
                 else:
-                    bd.add(clean_word(w))
+                    if parola_pulita in bd:
+                        bd[parola_pulita] += 1
+                    else:
+                        bd[parola_pulita] = 1
             contatore += 1
-        
-        print(bd)
 
- 
+        for w, count in bd.items():
+            if count > min_freq:
+                if w in gd and (count/gd[w] > ratio_min) :
+                    self.bad_words[w] = count/gd[w]
+                    #print(f"'{w}' -> Negative: {count} | Positive: {gd[w]}")
+                if w not in gd:
+                    self.bad_words[w] = count
+                    #print(f"'{w}' -> Negative: {count} | Positive: 0") 
+        for w, count in gd.items():
+            if count > min_freq:
+                if w in bd and (count/bd[w] > ratio_min):
+                    self.good_words[w] = count/bd[w]
+                    #print(f"'{w}' -> Positive: {count} | Negative: {bd[w]}")
+                if w not in bd:
+                    #print(f"'{w}' -> Positive: {count} | Negative: 0")
+                    self.good_words[w] = count
+        #print(good_words)
 
 
     def predict(self, reviews):
         good = 0
         bad = 0
-        good_review = 0
-        bad_review = 0
+        res = 0
 
         text = [r["text"] for r in reviews]
+        labels = [l["label"] for l in reviews]
+        count = 0
         for row in text: 
             words = row.strip().split(' ')
             #print(words)
             for word in words:
-                if word in good_words:
-                    good += 1
-                elif word in bad_words:
-                    bad += 1
+                if word in self.good_words:
+                    good += self.good_words[word]
+                elif word in self.bad_words:
+                    bad += self.bad_words[word]
             #print(f"ci sono {good} parole buone e {bad} parole cattive")
-            if good > bad:
-                good_review += 1
-            elif bad >= good:
-                bad_review += 1
+
+            if (good > bad and labels[count] == "1") or (bad >= good and labels[count] == "0"):
+                res += 1
+                print(f"bene = {good}, male = {bad} DAJEEEE")
+            else:
+                print(f"bene = {good}, male = {bad} ...")
+
             good = 0
             bad = 0
-        
-        res = "Errore"
-        if good_review >= bad_review:
-            res = "Positive"
-            self.majority_class = 1
-        else:
-            res = "Negative"
-            self.majority_class = 0
+            count += 1
+            #print(res, count)
+       
 
-        avg = max(bad_review, good_review) / (good_review+bad_review)
-        print(f"[WordModel] Majority class: '{res}', " 
-              f"({max(bad_review, good_review)}/{(good_review+bad_review)}), "
-              f"{avg:.3%}")  
+        acc = res / count
+        print(f"accuracy : {acc:.3%}")  
 
 
 

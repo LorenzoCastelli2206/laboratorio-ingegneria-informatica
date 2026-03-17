@@ -10,10 +10,11 @@ def main():
     second_part = list_csv[mid:]
     
     basic = BasicModel()
-    basic.train(first_part)
+    basic.train(list_csv)
 
     word = WordModel()
     word.train(first_part)
+    word.predict(second_part)
 
 
 

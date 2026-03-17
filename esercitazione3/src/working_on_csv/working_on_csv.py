@@ -2,7 +2,8 @@ import re
 
 def clean_word(word):
     testo_min = word.lower()
-    testo_pulito = re.sub(r'[^a-z0-9\s]', '', testo_min) 
+    testo_min = testo_min.replace('<br', "")
+    testo_pulito = re.sub(r'[^a-z\s]', '', testo_min) 
     return testo_pulito
 
 def build_list_csv(file_csv):
