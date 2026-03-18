@@ -1,5 +1,6 @@
 from abc import ABC, abstractmethod
 from working_on_csv.working_on_csv import clean_word
+import csv
 
 class Model(ABC):
     @abstractmethod
@@ -13,10 +14,14 @@ class Model(ABC):
     def predict_all(self, reviews):
         return [self.predict(r["text"]) for r in reviews]
 
+
+
+    ################################## BASICMODEL  ################################## 
 class BasicModel(Model):
     def __init__(self):
         self.majority_class = None
 
+    ################################## BASICMODEL TRAIN ################################## 
     def train(self, reviews):
         labels = [r["label"] for r in reviews]
         counts = {}
@@ -34,11 +39,34 @@ class BasicModel(Model):
              res = "Negative"
 
         avg = counts[str(self.majority_class)]/len(labels)
-        print(f"[BasicModel] Majority class: '{res}', " f"({counts[str(self.majority_class)]}/{len(labels)}), {avg:.3%}")
+        #print(f"[BasicModel] Majority class: '{res}', " f"({counts[str(self.majority_class)]}/{len(labels)}), {avg:.3%}")
 
+    ################################## BASICMODEL PREDICT ################################## 
     def predict(self, reviews):
-        return self.majority_class
-    
+        file_name = "predict_BM.csv"
+
+        labels = [r["label"] for r in reviews]
+        texts = [t["text"] for t in reviews]
+        count = 0
+        res = 0
+        for r in reviews : 
+            if (labels[count] == "0" and self.majority_class == 0) or (labels[count] == "1" and self.majority_class == 1):
+                res += 1
+
+            with open(file_name, "a", newline="", encoding="utf-8") as file:
+                writer = csv.writer(file, delimiter= ',')
+                writer.writerow([texts[count], labels[count], str(self.majority_class)])
+            
+            count += 1
+        
+        print(f"Prediction saved on {file_name}")
+
+        acc = res/count
+        return acc
+
+
+
+    ################################## WORDMODEL ################################## 
 min_freq = 5
 ratio_min = 1.9 
 
@@ -48,6 +76,7 @@ class WordModel(Model):
         self.good_words = {}
         self.bad_words = {}
 
+    ################################## WORDMODEL TRAIN ##################################
     def train(self, reviews):
         gd = {}
         bd = {}
@@ -88,41 +117,47 @@ class WordModel(Model):
                 if w not in bd:
                     #print(f"'{w}' -> Positive: {count} | Negative: 0")
                     self.good_words[w] = count
-        #print(good_words)
 
-
+    ################################## WORDMODEL PREDICT ##################################
     def predict(self, reviews):
+        file_name = "predict_WM.csv"
+
         good = 0
         bad = 0
         res = 0
 
-        text = [r["text"] for r in reviews]
+        texts = [r["text"] for r in reviews]
         labels = [l["label"] for l in reviews]
         count = 0
-        for row in text: 
+        for row in texts: 
             words = row.strip().split(' ')
-            #print(words)
             for word in words:
                 if word in self.good_words:
                     good += self.good_words[word]
                 elif word in self.bad_words:
                     bad += self.bad_words[word]
-            #print(f"ci sono {good} parole buone e {bad} parole cattive")
 
             if (good > bad and labels[count] == "1") or (bad >= good and labels[count] == "0"):
                 res += 1
-                print(f"bene = {good}, male = {bad} DAJEEEE")
-            else:
-                print(f"bene = {good}, male = {bad} ...")
 
+            char_csv = ''
+            if good>bad:
+                char_csv = "1"
+            else:
+                char_csv = "0"
             good = 0
             bad = 0
+
+            with open(file_name, "a", newline="", encoding="utf-8") as file:
+                writer = csv.writer(file, delimiter= ',')
+                writer.writerow([texts[count], labels[count], char_csv])
+
             count += 1
-            #print(res, count)
        
+        print(f"Prediction saved on {file_name}")
 
         acc = res / count
-        print(f"accuracy : {acc:.3%}")  
+        return acc
 
 
 
