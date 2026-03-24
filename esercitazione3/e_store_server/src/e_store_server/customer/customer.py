@@ -1,5 +1,4 @@
-from abc import ABC, abstractmethod
-from e_store.store_item.store_item import NormalItem, GenericItem
+from abc import ABC
 
 class GenericCustomer(ABC):
     def __init__(self, name, balance, password):
@@ -21,14 +20,12 @@ class GenericCustomer(ABC):
         self.balance -= price_item
 
     def add_to_backpack(self, item, quantity: int):
-        """Aggiunge un oggetto allo zaino o ne aggiorna la quantità."""
         if item in self.backpack:
             self.backpack[item] += quantity
         else:
             self.backpack[item] = quantity
 
     def get_backpack_items(self):
-        """Restituisce il dizionario degli oggetti posseduti."""
         return self.backpack
 
     def __str__(self):
